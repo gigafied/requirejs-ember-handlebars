@@ -20,10 +20,10 @@ define(
 
 						req(["text!" + name + ext], function (val) {
 
-							var contents = "define('" + module.id + "!" + name  +
+							var output = "define('" + module.id + "!" + name  +
 							"', ['" + Ember + "'], function (Ember) {\nvar t = Ember.TEMPLATES['" + name + "'] = Ember.Handlebars.compile(" + val + ");\nreturn t;\n});\n";
 
-							eval(contents);
+							eval(output);
 
 							req([module.id + "!" + name], function (val) {
 								load(val);
@@ -43,16 +43,11 @@ define(
 				var ext = (config.ehbs.extension !== false) ? "." + config.ehbs.extension || ".hbs" : "",
 					fs = nodeRequire('fs'),
 					file = require.toUrl(name) + ext,
-					contents = fs.readFileSync(file).toString(),
-
 					compiler = require('./ember-template-compiler.js'),
-					template = fs.readFileSync(file).toString(),
-					val = compiler.precompile(template).toString();
+					template = compiler.precompile(fs.readFileSync(file).toString()).toString(),
+					output = "define('" + plugin + "!" + name  + "', ['" + Ember + "'], function (Ember) {\nvar t = Ember.TEMPLATES['" + name + "'] = Ember.Handlebars.template(" + template + ");\nreturn t;\n});\n";
 
-				contents = "define('" + plugin + "!" + name  +
-				"', ['" + Ember + "'], function (Ember) {\nvar t = Ember.TEMPLATES['" + name + "'] = Ember.Handlebars.template(" + val + ");\nreturn t;\n});\n";
-
-				return contents;
+				return output;
 			},
 
 			write: function (pluginName, moduleName, write, config) {
