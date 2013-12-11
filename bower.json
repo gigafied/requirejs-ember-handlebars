@@ -5,7 +5,8 @@
     "./ehbs.js"
   ],
   "dependencies": {
-    "requirejs-text": "~2.0.10"
+    "requirejs-text": "~2.0.10",
+    "ember-template-compiler": "https://raw.github.com/toranb/ember-template-compiler/master/vendor/ember-template-compiler.js"
   },
   "homepage": "https://github.com/gigafied/requirejs-ember-handlebars",
   "authors": [
