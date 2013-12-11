@@ -7,45 +7,56 @@ define(
 
 	function (module, text) {
 
+		var parseConfig = function (config) {
+			config.ehbs = config.ehbs || {};
+
+			var extension = (config.ehbs.extension !== false) ? "." + (config.ehbs.extension || "hbs") : "",
+				templatePath = config.ehbs.templatePath ? config.ehbs.templatePath + (config.ehbs.templatePath[config.ehbs.templatePath.length-1] === "/" ? "" : "/") : "",
+				ember = config.ehbs.ember || "Ember";
+
+			return {
+				extension : extension,
+				templatePath : templatePath,
+				ember : ember
+			};
+		};
+
 		return {
 
 			load: function (name, req, load, config) {
 
-				req(['$'], function ($) {
+				var ehbsConfig = parseConfig(config);
 
-					if (!config.isBuild) {
+				if (!config.isBuild) {
 
-						var ext = (config.ehbs.extension !== false) ? "." + config.ehbs.extension || "hbs" : "",
-							Ember = config.ehbs.ember || "Ember";
+					req(["text!" + ehbsConfig.templatePath + name + ehbsConfig.extension], function (val) {
 
-						req(["text!" + name + ext], function (val) {
-
-							var output = "define('" + module.id + "!" + name  +
-							"', ['" + Ember + "'], function (Ember) {\nvar t = Ember.TEMPLATES['" + name + "'] = Ember.Handlebars.compile(" + val + ");\nreturn t;\n});\n";
-
-							eval(output);
-
-							req([module.id + "!" + name], function (val) {
-								load(val);
-							});
-
+						define(module.id + "!" + name, [ehbsConfig.ember], function (Ember) {
+							var t = Ember.TEMPLATES[name] = Ember.Handlebars.compile(val);
+							return t;
 						});
 
-					}
-					else {
-						load("");
-					}
-				});
+						req([module.id + "!" + name], function (val) {
+							load(val);
+						});
+
+					});
+
+				}
+				else {
+					load("");
+				}
 			},
 
 			loadFromFileSystem : function (plugin, name) {
 
-				var ext = (config.ehbs.extension !== false) ? "." + config.ehbs.extension || ".hbs" : "",
-					fs = nodeRequire('fs'),
-					file = require.toUrl(name) + ext,
+				var ehbsConfig = parseConfig(config);
+
+				var fs = nodeRequire('fs'),
+					file = require.toUrl(ehbsConfig.templatePath + name) + ehbsConfig.extension,
 					compiler = require('./ember-template-compiler.js'),
 					template = compiler.precompile(fs.readFileSync(file).toString()).toString(),
-					output = "define('" + plugin + "!" + name  + "', ['" + Ember + "'], function (Ember) {\nvar t = Ember.TEMPLATES['" + name + "'] = Ember.Handlebars.template(" + template + ");\nreturn t;\n});\n";
+					output = "define('" + plugin + "!" + name  + "', ['" + ehbsConfig.ember + "'], function (Ember) {\nvar t = Ember.TEMPLATES['" + name + "'] = Ember.Handlebars.template(" + template + ");\nreturn t;\n});\n";
 
 				return output;
 			},
