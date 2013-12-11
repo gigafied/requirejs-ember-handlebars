@@ -15,7 +15,7 @@ define(
 
 					if (!config.isBuild) {
 
-						var ext = (config.ehbs.extension !== false) ? "." + config.ehbs.extension || ".hbs" : "",
+						var ext = (config.ehbs.extension !== false) ? "." + config.ehbs.extension || "hbs" : "",
 							Ember = config.ehbs.ember || "Ember";
 
 						req(["text!" + name + ext], function (val) {
