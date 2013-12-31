@@ -1,6 +1,9 @@
 ### requirejs-ember-handlebars
 A requirejs plugin for using ember templates
 
+		$ bower install requirejs-ember-handlebars
+		$ npm install ember-template-compiler
+		
 #### Example
 
 	define(
