@@ -54,8 +54,8 @@ define(
 
 				var fs = nodeRequire('fs'),
 					file = require.toUrl(CONFIG.templatePath + name) + CONFIG.extension,
-					compiler = nodeRequire('ember-template-compiler'),
-					template = compiler.precompile(fs.readFileSync(file).toString()).toString(),
+					compiler = nodeRequire(CONFIG.etcPath || 'ember-template-compiler'),
+					template = compiler.precompile(fs.readFileSync(file, { encoding: 'utf8' })),
 					output = "define('" + plugin + "!" + name  + "', ['" + CONFIG.ember + "'], function (Ember) {\nvar t = Ember.TEMPLATES['" + name + "'] = Ember.Handlebars.template(" + template + ");\nreturn t;\n});\n";
 
 				return output;
